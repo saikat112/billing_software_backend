@@ -23,7 +23,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     private final S3Client s3Client;
 
     @Override
-    public String UploadFile(MultipartFile file) {
+    public String uploadFile(MultipartFile file) {
         String filenameExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")+1);
         String key = UUID.randomUUID().toString()+"."+filenameExtension;
         try{

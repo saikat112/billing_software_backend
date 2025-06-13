@@ -4,6 +4,7 @@ import billing.billingsoftware.entity.CategoryEntity;
 import billing.billingsoftware.io.CategoryRequest;
 import billing.billingsoftware.io.CategoryResponse;
 import billing.billingsoftware.repository.CategoryRepository;
+import billing.billingsoftware.repository.ItemRepository;
 import billing.billingsoftware.service.CategoryService;
 import billing.billingsoftware.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
@@ -14,14 +15,17 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static billing.billingsoftware.io.CategoryResponse.*;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
-private final CategoryRepository categoryRepository;
-private final FileUploadService fileUploadService;
+    private final CategoryRepository categoryRepository;
+    private final FileUploadService fileUploadService;
+    private final ItemRepository itemRepository;
     @Override
     public CategoryResponse add(CategoryRequest request, MultipartFile file) {
-        String imgUrl =  fileUploadService.UploadFile(file);
+        String imgUrl =  fileUploadService.uploadFile(file);
         CategoryEntity newCategory  =  convertToEntity(request);
         newCategory.setImgUrl(imgUrl);
         newCategory =  categoryRepository.save(newCategory);
@@ -45,7 +49,8 @@ private final FileUploadService fileUploadService;
     }
 
     private CategoryResponse convertToResponse(CategoryEntity newCategory) {
-        return CategoryResponse.builder()
+        Integer itemsCount =  itemRepository.countByCategoryId(newCategory.getId());
+        return builder()
                 .categoryId(newCategory.getCategoryId())
                 .name(newCategory.getName())
                 .description(newCategory.getDescription())
@@ -53,6 +58,7 @@ private final FileUploadService fileUploadService;
                 .imgUrl(newCategory.getImgUrl())
                 .createdAt(newCategory.getCreatedAt())
                 .updateAt(newCategory.getUpdatedAt())
+                .items(itemsCount)
                 .build();
     }
 
